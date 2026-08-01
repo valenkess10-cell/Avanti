@@ -1,0 +1,141 @@
+<script setup>
+import { useCart } from '../composables/useCart'
+
+const props = defineProps({
+  product: { type: Object, required: true },
+})
+
+const { add } = useCart()
+</script>
+
+<template>
+  <article class="card" :class="`card--${product.size}`">
+    <div class="card__image" :style="{ background: product.tone }">
+      <button class="card__add" @click="add(product)" :aria-label="`Añadir ${product.name} al carrito`">
+        Añadir
+      </button>
+
+      <div class="card__tag">
+        <span>{{ product.fabric }}</span>
+        <span>{{ product.fit }}</span>
+      </div>
+    </div>
+
+    <div class="card__info">
+      <div class="card__row">
+        <h3 class="card__name">{{ product.name }}</h3>
+        <span class="card__price">{{ product.price }}€</span>
+      </div>
+      <p class="card__category">{{ product.category }} · {{ product.origin }}</p>
+    </div>
+  </article>
+</template>
+
+<style scoped>
+.card {
+  display: flex;
+  flex-direction: column;
+}
+
+.card__image {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+}
+
+.card--short .card__image {
+  aspect-ratio: 3 / 3.4;
+}
+
+.card__add {
+  position: absolute;
+  left: var(--space-2);
+  right: var(--space-2);
+  bottom: var(--space-2);
+  background: var(--paper);
+  border: none;
+  padding: 0.7rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease, background 0.25s ease;
+}
+
+.card:hover .card__add {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card__add:hover {
+  background: var(--ink);
+  color: var(--bone);
+}
+
+/* Elemento firma: etiqueta de composición, como una etiqueta de tela real,
+   visible en hover, coherente con la del hero. */
+.card__tag {
+  position: absolute;
+  top: var(--space-2);
+  right: -6px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 0.4rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transform: rotate(3deg);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.card:hover .card__tag {
+  opacity: 1;
+}
+
+.card__tag span {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.card__info {
+  padding-top: var(--space-2);
+}
+
+.card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.card__name {
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.card__price {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.card__category {
+  font-size: 0.78rem;
+  margin-top: 2px;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 780px) {
+  .card__tag,
+  .card__add {
+    opacity: 1;
+    transform: none;
+  }
+}
+</style>
