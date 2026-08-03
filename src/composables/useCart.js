@@ -8,6 +8,28 @@ const state = reactive({
   isOpen: false,
 })
 
+// TODO: reemplazar por el número real del negocio.
+// Formato: código de país + área sin el 0 + número sin el 15. Ej: Argentina, La Rioja capital: 549380XXXXXXX
+const WHATSAPP_NUMBER = '5493800000000'
+
+function formatPrice(value) {
+  return value.toLocaleString('es-AR')
+}
+
+function buildOrderMessage(items, subtotal) {
+  const lines = items.map(
+    (item) => `• ${item.qty}x ${item.name} — $${formatPrice(item.price * item.qty)}`
+  )
+
+  return [
+    'Hola! Quiero hacer este pedido:',
+    '',
+    ...lines,
+    '',
+    `Subtotal: $${formatPrice(subtotal)}`,
+  ].join('\n')
+}
+
 export function useCart() {
   const count = computed(() =>
     state.items.reduce((total, item) => total + item.qty, 0)
@@ -50,5 +72,17 @@ export function useCart() {
     state.isOpen = false
   }
 
-  return { state, count, subtotal, add, remove, increment, decrement, open, close }
+  // Arma el pedido en texto y abre WhatsApp con el mensaje precargado.
+  // No procesa pago: el negocio sigue coordinando envío/transferencia por chat,
+  // solo que ahora recibe el pedido ya prolijo y sin tener que preguntar nada.
+  function checkout() {
+    console.log('checkout ejecutado', state.items)
+    if (state.items.length === 0) return
+
+    const message = buildOrderMessage(state.items, subtotal.value)
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
+    window.location.href = url
+  }
+
+  return { state, count, subtotal, add, remove, increment, decrement, open, close, checkout }
 }

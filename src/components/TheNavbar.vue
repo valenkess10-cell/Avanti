@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useCart } from '../composables/useCart'
+import ContactMenu from './ContactMenu.vue'
 
 const { count, open } = useCart()
 
@@ -27,6 +28,8 @@ const links = ['Colección', 'Básicos', 'Sobre FORME', 'Contacto']
       </nav>
 
       <div class="nav__actions">
+        <ContactMenu />
+
         <button class="nav__icon-btn" @click="open" aria-label="Abrir carrito">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
             <path d="M6 8h12l-1 12H7L6 8Z" />

@@ -1,7 +1,21 @@
 <script setup>
+import { ref } from 'vue'
 import { useCart } from '../composables/useCart'
 
-const { state, subtotal, close, increment, decrement, remove } = useCart()
+const { state, subtotal, close, increment, decrement, remove, checkout } = useCart()
+
+const isSending = ref(false)
+
+function handleCheckout() {
+  if (isSending.value || state.items.length === 0) return
+  isSending.value = true
+  // Deja ver la animación un instante antes de saltar a WhatsApp,
+  // así el click se siente "confirmado" en vez de un salto brusco.
+  setTimeout(() => {
+    checkout()
+    isSending.value = false
+  }, 550)
+}
 </script>
 
 <template>
@@ -38,7 +52,7 @@ const { state, subtotal, close, increment, decrement, remove } = useCart()
                 <span>{{ item.qty }}</span>
                 <button @click="increment(item.id)" aria-label="Sumar unidad">+</button>
               </div>
-              <span class="line__price">{{ item.price * item.qty }}€</span>
+              <span class="line__price">${{ (item.price * item.qty).toLocaleString('es-AR') }}</span>
             </div>
           </div>
         </li>
@@ -47,10 +61,20 @@ const { state, subtotal, close, increment, decrement, remove } = useCart()
       <div v-if="state.items.length > 0" class="drawer__footer">
         <div class="drawer__subtotal">
           <span>Subtotal</span>
-          <span class="font-mono">{{ subtotal }}€</span>
+          <span class="font-mono">${{ subtotal.toLocaleString('es-AR') }}</span>
         </div>
-        <p class="drawer__note">Envío e impuestos calculados en el pago.</p>
-        <button class="btn btn--solid drawer__checkout">Finalizar compra</button>
+        <p class="drawer__note">Coordinamos envío y pago por WhatsApp.</p>
+        <button
+          class="btn btn--solid drawer__checkout"
+          :class="{ 'is-sending': isSending }"
+          :disabled="isSending"
+          @click="handleCheckout"
+        >
+          <span class="drawer__checkout-label">Finalizar compra por WhatsApp</span>
+          <svg class="drawer__checkout-check" viewBox="0 0 24 24" fill="none">
+            <path d="M4 12.5l5 5L20 6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
       </div>
     </aside>
   </transition>
@@ -207,6 +231,56 @@ const { state, subtotal, close, increment, decrement, remove } = useCart()
 .drawer__checkout {
   width: 100%;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease;
+}
+
+.drawer__checkout:active {
+  transform: scale(0.97);
+}
+
+.drawer__checkout-label,
+.drawer__checkout-check {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+}
+
+.drawer__checkout-check {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  color: var(--paper);
+  opacity: 0;
+  transform: scale(0.4);
+}
+
+.drawer__checkout.is-sending {
+  animation: checkout-pulse 0.55s ease;
+}
+
+.drawer__checkout.is-sending .drawer__checkout-label {
+  opacity: 0;
+  transform: translateY(-14px);
+}
+
+.drawer__checkout.is-sending .drawer__checkout-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes checkout-pulse {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(0.96);
+  }
+  60% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .overlay-enter-active,

@@ -24,7 +24,7 @@ const { add } = useCart()
     <div class="card__info">
       <div class="card__row">
         <h3 class="card__name">{{ product.name }}</h3>
-        <span class="card__price">{{ product.price }}€</span>
+        <span class="card__price">${{ product.price.toLocaleString('es-AR') }}</span>
       </div>
       <p class="card__category">{{ product.category }} · {{ product.origin }}</p>
     </div>
