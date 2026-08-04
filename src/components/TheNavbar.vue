@@ -1,9 +1,11 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useCart } from '../composables/useCart'
+import { useContactPanel } from '../composables/useContactPanel'
 import ContactMenu from './ContactMenu.vue'
 
 const { count, open } = useCart()
+const { toggle: toggleContact } = useContactPanel()
 
 const scrolled = ref(false)
 const menuOpen = ref(false)
@@ -12,10 +14,15 @@ function handleScroll() {
   scrolled.value = window.scrollY > 24
 }
 
+function scrollToLocation() {
+  document.getElementById('ubicacion')?.scrollIntoView({ behavior: 'smooth' })
+  menuOpen.value = false
+}
+
 onMounted(() => window.addEventListener('scroll', handleScroll))
 onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 
-const links = ['Colección', 'Básicos', 'Sobre FORME', 'Contacto']
+const links = ['Colección', 'Básicos', 'Sobre FORME']
 </script>
 
 <template>
@@ -25,10 +32,18 @@ const links = ['Colección', 'Básicos', 'Sobre FORME', 'Contacto']
 
       <nav class="nav__links">
         <a v-for="link in links" :key="link" href="#" class="nav__link">{{ link }}</a>
+        <button class="nav__link nav__link--btn" @click="toggleContact">Contacto</button>
       </nav>
 
       <div class="nav__actions">
         <ContactMenu />
+
+        <button class="nav__icon-btn" @click="scrollToLocation" aria-label="Ver ubicación del local">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M12 21s7-6.2 7-11.2A7 7 0 0 0 5 9.8C5 14.8 12 21 12 21Z" />
+            <circle cx="12" cy="9.6" r="2.4" />
+          </svg>
+        </button>
 
         <button class="nav__icon-btn" @click="open" aria-label="Abrir carrito">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
@@ -49,6 +64,8 @@ const links = ['Colección', 'Básicos', 'Sobre FORME', 'Contacto']
     <transition name="fade-down">
       <div v-if="menuOpen" class="nav__mobile">
         <a v-for="link in links" :key="link" href="#" @click="menuOpen = false">{{ link }}</a>
+        <button class="nav__mobile-btn" @click="toggleContact(); menuOpen = false">Contacto</button>
+        <button class="nav__mobile-btn" @click="scrollToLocation">Ubicación</button>
       </div>
     </transition>
   </header>
@@ -116,6 +133,13 @@ const links = ['Colección', 'Básicos', 'Sobre FORME', 'Contacto']
   width: 100%;
 }
 
+.nav__link--btn {
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
 .nav__actions {
   display: flex;
   align-items: center;
@@ -173,6 +197,16 @@ const links = ['Colección', 'Básicos', 'Sobre FORME', 'Contacto']
   }
   .nav__mobile a {
     font-size: 0.95rem;
+  }
+  .nav__mobile-btn {
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+    text-align: left;
+    padding: 0;
+    cursor: pointer;
   }
 }
 

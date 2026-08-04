@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from 'vue'
+import { useContactPanel } from '../composables/useContactPanel'
 
-const open = ref(false)
+const { state, toggle, close } = useContactPanel()
 
 // Datos de ejemplo: reemplazar por los datos reales del negocio.
 const contact = {
@@ -10,101 +10,127 @@ const contact = {
   email: 'contacto@avanti.com',
   instagram: '@avanti.gram',
 }
-
-function toggle() {
-  open.value = !open.value
-}
 </script>
 
 <template>
-  <div class="contact">
-    <button class="nav__icon-btn" @click="toggle" aria-label="Ver datos de contacto">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
-        <path d="M4 6h16v12H4z" />
-        <path d="M4 7l8 6 8-6" />
-      </svg>
-    </button>
+  <button
+    class="nav__icon-btn"
+    :class="{ 'is-active': state.isOpen }"
+    aria-label="Ver datos de contacto"
+    @click="toggle"
+  >
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+      <path d="M4 6h16v12H4z" />
+      <path d="M4 7l8 6 8-6" />
+    </svg>
+  </button>
 
-    <transition name="fade-down">
-      <div v-if="open" class="contact__panel" @click="open = false">
-        <a
-          :href="`https://wa.me/${contact.whatsappNumber}`"
-          target="_blank"
-          rel="noopener"
-          class="contact__row"
-        >
-          <span class="contact__label">WhatsApp</span>
-          <span>{{ contact.whatsappDisplay }}</span>
+  <transition name="bar-drop">
+    <div v-if="state.isOpen" class="contact-bar">
+      <div class="contact-bar__inner wrap">
+        <a :href="`https://wa.me/${contact.whatsappNumber}`" target="_blank" rel="noopener" class="contact-bar__item">
+          <span class="contact-bar__label">WhatsApp</span>
+          <span class="contact-bar__value">{{ contact.whatsappDisplay }}</span>
         </a>
 
-        <a :href="`mailto:${contact.email}`" class="contact__row">
-          <span class="contact__label">Email</span>
-          <span>{{ contact.email }}</span>
+        <a :href="`mailto:${contact.email}`" class="contact-bar__item">
+          <span class="contact-bar__label">Email</span>
+          <span class="contact-bar__value">{{ contact.email }}</span>
         </a>
 
-        <a
-          href="https://instagram.com/avanti.gram"
-          target="_blank"
-          rel="noopener"
-          class="contact__row"
-        >
-          <span class="contact__label">Instagram</span>
-          <span>{{ contact.instagram }}</span>
+        <a href="https://instagram.com/avanti.gram" target="_blank" rel="noopener" class="contact-bar__item">
+          <span class="contact-bar__label">Instagram</span>
+          <span class="contact-bar__value">{{ contact.instagram }}</span>
         </a>
+
+        <button class="contact-bar__close" aria-label="Cerrar contacto" @click="close">✕</button>
       </div>
-    </transition>
-  </div>
+    </div>
+  </transition>
 </template>
 
 <style scoped>
-.contact {
-  position: relative;
-}
-
-.contact__panel {
-  position: absolute;
-  top: calc(100% + 12px);
-  right: 0;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  padding: var(--space-2);
-  min-width: 230px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  box-shadow: 0 10px 24px rgba(28, 27, 25, 0.12);
-  z-index: 60;
-}
-
-.contact__row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-size: 0.82rem;
-  color: var(--ink);
-}
-
-.contact__row:hover {
+.nav__icon-btn.is-active {
   color: var(--moss);
 }
 
-.contact__label {
-  color: var(--ink-soft);
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  white-space: nowrap;
+.contact-bar {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 39;
 }
 
-.fade-down-enter-active,
-.fade-down-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+.contact-bar__inner {
+  position: relative;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+  box-shadow: 0 12px 28px rgba(28, 27, 25, 0.1);
 }
-.fade-down-enter-from,
-.fade-down-leave-to {
+
+.contact-bar__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contact-bar__label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.contact-bar__value {
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.contact-bar__item:hover .contact-bar__value {
+  color: var(--moss);
+}
+
+.contact-bar__close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  padding: 0.3rem;
+}
+
+.contact-bar__close:hover {
+  color: var(--ink);
+}
+
+.bar-drop-enter-active,
+.bar-drop-leave-active {
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bar-drop-enter-from,
+.bar-drop-leave-to {
   opacity: 0;
-  transform: translateY(-6px);
+  transform: translateY(-12px);
+}
+
+@media (max-width: 780px) {
+  .contact-bar__inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .contact-bar__close {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-2);
+    margin-left: 0;
+  }
 }
 </style>

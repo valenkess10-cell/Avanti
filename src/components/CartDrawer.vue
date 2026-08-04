@@ -300,4 +300,4 @@ function handleCheckout() {
 .drawer-leave-to {
   transform: translateX(100%);
 }
-</style>
+</style>  
