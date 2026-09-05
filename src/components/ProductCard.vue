@@ -17,7 +17,16 @@ function handleAdd() {
 
 <template>
   <article class="card" :class="`card--${product.size}`">
-    <div class="card__image" :style="{ background: product.tone }">
+    <div
+      class="card__image"
+      :style="product.image
+        ? {
+            backgroundImage: `url(${product.image}), ${product.tone}`,
+            backgroundSize: 'cover, cover',
+            backgroundPosition: 'center, center',
+          }
+        : { background: product.tone }"
+    >
       <div class="card__sizes" role="group" aria-label="Elegir talle">
         <button
           v-for="opt in product.sizeOptions"
