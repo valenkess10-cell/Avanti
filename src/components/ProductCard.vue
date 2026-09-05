@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import { useCart } from '../composables/useCart'
 
 const props = defineProps({
@@ -6,13 +7,32 @@ const props = defineProps({
 })
 
 const { add } = useCart()
+
+const selectedSize = ref(props.product.sizeOptions[0])
+
+function handleAdd() {
+  add(props.product, selectedSize.value)
+}
 </script>
 
 <template>
   <article class="card" :class="`card--${product.size}`">
     <div class="card__image" :style="{ background: product.tone }">
-      <button class="card__add" @click="add(product)" :aria-label="`Añadir ${product.name} al carrito`">
-        Añadir
+      <div class="card__sizes" role="group" aria-label="Elegir talle">
+        <button
+          v-for="opt in product.sizeOptions"
+          :key="opt"
+          type="button"
+          class="card__size"
+          :class="{ 'is-active': selectedSize === opt }"
+          @click="selectedSize = opt"
+        >
+          {{ opt }}
+        </button>
+      </div>
+
+      <button class="card__add" @click="handleAdd" :aria-label="`Añadir ${product.name}, talle ${selectedSize}, al carrito`">
+        Añadir · Talle {{ selectedSize }}
       </button>
 
       <div class="card__tag">
@@ -26,7 +46,7 @@ const { add } = useCart()
         <h3 class="card__name">{{ product.name }}</h3>
         <span class="card__price">${{ product.price.toLocaleString('es-AR') }}</span>
       </div>
-      <p class="card__category">{{ product.category }} · {{ product.origin }}</p>
+      <p class="card__category">{{ product.category }} · Talles {{ product.sizes }}</p>
     </div>
   </article>
 </template>
@@ -47,6 +67,39 @@ const { add } = useCart()
   aspect-ratio: 3 / 3.4;
 }
 
+.card__sizes {
+  position: absolute;
+  left: var(--space-2);
+  right: var(--space-2);
+  bottom: calc(var(--space-2) + 2.6rem);
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.card:hover .card__sizes {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card__size {
+  flex: 1;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 0.35rem 0;
+}
+
+.card__size.is-active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--bone);
+}
+
 .card__add {
   position: absolute;
   left: var(--space-2);
@@ -55,8 +108,8 @@ const { add } = useCart()
   background: var(--paper);
   border: none;
   padding: 0.7rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
   color: var(--ink);
   opacity: 0;
   transform: translateY(8px);
@@ -114,8 +167,12 @@ const { add } = useCart()
 }
 
 .card__name {
-  font-size: 1rem;
-  font-weight: 400;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: 1.25;
 }
 
 .card__price {
@@ -133,7 +190,8 @@ const { add } = useCart()
 
 @media (max-width: 780px) {
   .card__tag,
-  .card__add {
+  .card__add,
+  .card__sizes {
     opacity: 1;
     transform: none;
   }

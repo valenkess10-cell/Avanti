@@ -1,14 +1,18 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useCart } from '../composables/useCart'
 import { useContactPanel } from '../composables/useContactPanel'
+import { useProductSearch } from '../composables/useProductSearch.js'
 import ContactMenu from './ContactMenu.vue'
 
 const { count, open } = useCart()
 const { toggle: toggleContact } = useContactPanel()
+const { state: search, setQuery, clear: clearSearch } = useProductSearch()
 
 const scrolled = ref(false)
 const menuOpen = ref(false)
+const searchOpen = ref(false)
+const searchInput = ref(null)
 
 function handleScroll() {
   scrolled.value = window.scrollY > 24
@@ -19,16 +23,30 @@ function scrollToLocation() {
   menuOpen.value = false
 }
 
+async function toggleSearch() {
+  searchOpen.value = !searchOpen.value
+  if (searchOpen.value) {
+    await nextTick()
+    searchInput.value?.focus()
+  } else {
+    clearSearch()
+  }
+}
+
+function goToResults() {
+  document.getElementById('coleccion')?.scrollIntoView({ behavior: 'smooth' })
+}
+
 onMounted(() => window.addEventListener('scroll', handleScroll))
 onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 
-const links = ['Colección', 'Básicos', 'Sobre FORME']
+const links = ['Colección', 'Básicos', 'Sobre Avanti']
 </script>
 
 <template>
   <header class="nav" :class="{ 'nav--scrolled': scrolled }">
     <div class="wrap nav__inner">
-      <a href="#" class="nav__logo">FORME</a>
+      <a href="#" class="nav__logo">AVANTI</a>
 
       <nav class="nav__links">
         <a v-for="link in links" :key="link" href="#" class="nav__link">{{ link }}</a>
@@ -36,6 +54,24 @@ const links = ['Colección', 'Básicos', 'Sobre FORME']
       </nav>
 
       <div class="nav__actions">
+        <div class="nav__search" :class="{ 'is-open': searchOpen }">
+          <input
+            ref="searchInput"
+            type="text"
+            placeholder="Buscar productos..."
+            :value="search.query"
+            @input="setQuery($event.target.value)"
+            @keyup.enter="goToResults"
+            @keyup.esc="toggleSearch"
+          />
+          <button class="nav__icon-btn" @click="toggleSearch" aria-label="Buscar productos">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
+          </button>
+        </div>
+
         <ContactMenu />
 
         <button class="nav__icon-btn" @click="scrollToLocation" aria-label="Ver ubicación del local">
@@ -83,7 +119,7 @@ const links = ['Colección', 'Básicos', 'Sobre FORME']
 }
 
 .nav--scrolled {
-  background: rgba(239, 238, 234, 0.92);
+  background: rgba(246, 245, 242, 0.92);
   backdrop-filter: blur(10px);
   border-color: var(--line);
 }
@@ -97,9 +133,12 @@ const links = ['Colección', 'Básicos', 'Sobre FORME']
 }
 
 .nav__logo {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  letter-spacing: 0.08em;
+  font-family: var(--font-logo);
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+  transform: skewX(-8deg);
+  display: inline-block;
 }
 
 .nav__links {
@@ -138,6 +177,36 @@ const links = ['Colección', 'Básicos', 'Sobre FORME']
   border: none;
   font-family: inherit;
   cursor: pointer;
+}
+
+.nav__search {
+  display: flex;
+  align-items: center;
+}
+
+.nav__search input {
+  width: 0;
+  opacity: 0;
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--ink);
+  padding: 0.3rem 0;
+  transition: width 0.25s ease, opacity 0.2s ease, border-color 0.25s ease;
+}
+
+.nav__search.is-open input {
+  width: 160px;
+  opacity: 1;
+  border-color: var(--line);
+  margin-right: var(--space-1);
+}
+
+.nav__search input:focus {
+  outline: none;
+  border-color: var(--ink);
 }
 
 .nav__actions {

@@ -1,22 +1,24 @@
 /* ==========================================================================
-   FORME — Sistema de diseño
-   Paleta: gris cálido "piedra" + acento musgo, tipografía editorial serif/mono
+   AVANTI — Sistema de diseño
+   Paleta: base neutra blanco/negro (retail genérico, no solo streetwear
+   agresivo), acento rojo reservado para ofertas y detalles puntuales
    ========================================================================== */
 
 :root {
   /* Color */
-  --bone:        #EFEEEA;  /* fondo principal, gris cálido, no crema */
-  --paper:       #F8F7F4;  /* tarjetas / superficies elevadas */
-  --ink:         #1C1B19;  /* texto principal, casi negro */
-  --ink-soft:    #55534C;  /* texto secundario */
-  --moss:        #4B5842;  /* acento principal */
-  --moss-deep:   #38412F;  /* acento hover/activo */
-  --clay:        #8B6F5C;  /* acento secundario, etiquetas */
-  --line:        #D9D6CD;  /* bordes / hairlines */
+  --bone:        #F6F5F2;  /* fondo principal, blanco cálido */
+  --paper:       #FFFFFF;  /* tarjetas / superficies elevadas */
+  --ink:         #161513;  /* texto principal, casi negro */
+  --ink-soft:    #6B6960;  /* texto secundario, gris */
+  --moss:        #B5563C;  /* acento puntual: ofertas, badges, detalles */
+  --moss-deep:   #8C4029;  /* acento hover/activo */
+  --clay:        #8A8579;  /* acento secundario neutro, etiquetas */
+  --line:        #E4E2DC;  /* bordes / hairlines */
   --white:       #FFFFFF;
 
   /* Tipografía */
-  --font-display: 'Fraunces', serif;
+  --font-display: 'Anton', sans-serif;
+  --font-logo: 'Poppins', sans-serif;
   --font-body: 'Work Sans', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
 
@@ -56,8 +58,9 @@ h1, h2, h3, h4 {
   font-family: var(--font-display);
   font-weight: 400;
   margin: 0;
-  line-height: 1.05;
-  letter-spacing: -0.01em;
+  line-height: 0.98;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
 }
 
 p {
@@ -121,6 +124,7 @@ button {
 .btn--solid:hover {
   background: var(--moss-deep);
   border-color: var(--moss-deep);
+  color: var(--white);
 }
 
 .visually-hidden {

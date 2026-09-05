@@ -8,30 +8,29 @@ defineProps({
   <section class="hero">
     <div class="wrap hero__inner">
       <div class="hero__text">
-        <p class="eyebrow">Colección Permanente — Otoño 01</p>
+        <p class="eyebrow">Nueva colección — todas las semanas</p>
         <h1 class="hero__title">
-          Prendas para
-          <em>quedarse.</em>
+          Encontrá
+          <em>tu estilo.</em>
         </h1>
         <p class="hero__desc">
-          Diseñamos un número reducido de piezas cada temporada, pensadas para
-          durar más que la tendencia que las trajo. Materiales nobles, calces
-          estudiados, nada de más.
+          Remeras, jeans, buzos y mucho más. Todo lo que necesitás para tu día
+          a día, con stock que se renueva cada semana.
         </p>
         <div class="hero__cta">
           <a href="#coleccion" class="btn btn--solid">Ver colección</a>
-          <a href="#sobre" class="btn">Nuestro proceso</a>
+          <a href="#sobre" class="btn">Sobre Avanti</a>
         </div>
       </div>
 
       <div class="hero__visual">
         <div class="hero__block">
-          <span class="hero__block-caption">Look 01 — Lino crudo</span>
+          <span class="hero__block-caption">Drop 01 — Urban Pack</span>
         </div>
         <div class="hero__tag" aria-hidden="true">
-          <span class="hero__tag-line">COMPOSICIÓN&nbsp;&nbsp;100% LINO</span>
-          <span class="hero__tag-line">CALCE&nbsp;&nbsp;RECTO</span>
-          <span class="hero__tag-line">ORIGEN&nbsp;&nbsp;PORTUGAL</span>
+          <span class="hero__tag-line">TELA&nbsp;&nbsp;ALGODÓN 100%</span>
+          <span class="hero__tag-line">CALCE&nbsp;&nbsp;OVERSIZE</span>
+          <span class="hero__tag-line">ORIGEN&nbsp;&nbsp;ARGENTINA</span>
         </div>
       </div>
     </div>
@@ -59,7 +58,7 @@ defineProps({
 }
 
 .hero__title em {
-  font-style: italic;
+  font-style: normal;
   color: var(--moss);
 }
 
@@ -81,7 +80,7 @@ defineProps({
 
 .hero__block {
   aspect-ratio: 3 / 4;
-  background: linear-gradient(160deg, #EFEEEA 0%, #C7C2B4 55%, #8B6F5C 100%);
+  background: linear-gradient(160deg, #D9D6CD 0%, #4A4844 65%, #161513 100%);
   position: relative;
   margin-left: var(--space-5);
   display: flex;
@@ -93,7 +92,7 @@ defineProps({
   font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.08em;
-  color: var(--bone);
+  color: var(--white);
   padding: var(--space-3);
   text-transform: uppercase;
 }

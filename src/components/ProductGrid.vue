@@ -1,16 +1,25 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { products } from '../data/products'
+import { useProductSearch } from '../composables/useProductSearch.js'
 import ProductCard from './ProductCard.vue'
+
+const { state: search, setQuery } = useProductSearch()
 
 const categories = ['Todo', ...new Set(products.map((p) => p.category))]
 const active = ref('Todo')
 
-const visible = computed(() =>
-  active.value === 'Todo'
-    ? products
-    : products.filter((p) => p.category === active.value)
-)
+const visible = computed(() => {
+  const byCategory =
+    active.value === 'Todo' ? products : products.filter((p) => p.category === active.value)
+
+  const query = search.query.trim().toLowerCase()
+  if (!query) return byCategory
+
+  return byCategory.filter(
+    (p) => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query)
+  )
+})
 </script>
 
 <template>
@@ -22,20 +31,39 @@ const visible = computed(() =>
           <h2 class="grid-section__title">Piezas de temporada</h2>
         </div>
 
-        <div class="grid-section__filters">
-          <button
-            v-for="cat in categories"
-            :key="cat"
-            class="filter"
-            :class="{ 'filter--active': active === cat }"
-            @click="active = cat"
-          >
-            {{ cat }}
-          </button>
+        <div class="grid-section__controls">
+          <div class="grid-section__search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Buscar por nombre o categoría..."
+              :value="search.query"
+              @input="setQuery($event.target.value)"
+            />
+          </div>
+
+          <div class="grid-section__filters">
+            <button
+              v-for="cat in categories"
+              :key="cat"
+              class="filter"
+              :class="{ 'filter--active': active === cat }"
+              @click="active = cat"
+            >
+              {{ cat }}
+            </button>
+          </div>
         </div>
       </div>
 
-      <transition-group tag="div" name="fade" class="grid">
+      <p v-if="visible.length === 0" class="grid-section__empty">
+        No encontramos productos que coincidan con "{{ search.query }}".
+      </p>
+
+      <transition-group v-else tag="div" name="fade" class="grid">
         <ProductCard v-for="product in visible" :key="product.id" :product="product" />
       </transition-group>
     </div>
@@ -55,11 +83,53 @@ const visible = computed(() =>
   margin-bottom: var(--space-4);
   border-bottom: 1px solid var(--line);
   padding-bottom: var(--space-3);
+  flex-wrap: wrap;
 }
 
 .grid-section__title {
   font-size: 2.2rem;
   margin-top: var(--space-1);
+}
+
+.grid-section__controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.grid-section__search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--line);
+  padding: 0.45rem 0.8rem;
+  color: var(--ink-soft);
+  min-width: 240px;
+}
+
+.grid-section__search:focus-within {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.grid-section__search input {
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--ink);
+  width: 100%;
+}
+
+.grid-section__search input:focus {
+  outline: none;
+}
+
+.grid-section__empty {
+  padding: var(--space-4) 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
 }
 
 .grid-section__filters {
@@ -120,6 +190,14 @@ const visible = computed(() =>
   .grid-section__head {
     flex-direction: column;
     align-items: flex-start;
+  }
+  .grid-section__controls {
+    align-items: flex-start;
+    width: 100%;
+  }
+  .grid-section__search {
+    width: 100%;
+    min-width: 0;
   }
   .grid {
     grid-template-columns: 1fr;

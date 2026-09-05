@@ -4,7 +4,7 @@ import { reactive, computed } from 'vue'
 // useCart() opera sobre la misma instancia reactiva (patrón singleton simple,
 // suficiente para el alcance de esta tienda sin necesidad de Pinia/Vuex).
 const state = reactive({
-  items: [], // { id, name, price, tone, qty }
+  items: [], // { key, id, name, price, tone, size, qty }
   isOpen: false,
 })
 
@@ -12,13 +12,20 @@ const state = reactive({
 // Formato: código de país + área sin el 0 + número sin el 15. Ej: Argentina, La Rioja capital: 549380XXXXXXX
 const WHATSAPP_NUMBER = '5493800000000'
 
+// Cada línea del carrito se identifica por producto + talle: así "Hoodie talle M"
+// y "Hoodie talle L" son renglones separados en vez de mezclarse en uno solo.
+function lineKey(id, size) {
+  return `${id}::${size}`
+}
+
 function formatPrice(value) {
   return value.toLocaleString('es-AR')
 }
 
 function buildOrderMessage(items, subtotal) {
   const lines = items.map(
-    (item) => `• ${item.qty}x ${item.name} — $${formatPrice(item.price * item.qty)}`
+    (item) =>
+      `• ${item.qty}x ${item.name} (Talle ${item.size}) — $${formatPrice(item.price * item.qty)}`
   )
 
   return [
@@ -39,29 +46,30 @@ export function useCart() {
     state.items.reduce((total, item) => total + item.qty * item.price, 0)
   )
 
-  function add(product) {
-    const existing = state.items.find((item) => item.id === product.id)
+  function add(product, size) {
+    const key = lineKey(product.id, size)
+    const existing = state.items.find((item) => item.key === key)
     if (existing) {
       existing.qty++
     } else {
-      state.items.push({ ...product, qty: 1 })
+      state.items.push({ ...product, size, key, qty: 1 })
     }
     state.isOpen = true
   }
 
-  function remove(id) {
-    state.items = state.items.filter((item) => item.id !== id)
+  function remove(key) {
+    state.items = state.items.filter((item) => item.key !== key)
   }
 
-  function increment(id) {
-    const item = state.items.find((i) => i.id === id)
+  function increment(key) {
+    const item = state.items.find((i) => i.key === key)
     if (item) item.qty++
   }
 
-  function decrement(id) {
-    const item = state.items.find((i) => i.id === id)
+  function decrement(key) {
+    const item = state.items.find((i) => i.key === key)
     if (item && item.qty > 1) item.qty--
-    else if (item) remove(id)
+    else if (item) remove(key)
   }
 
   function open() {
@@ -76,7 +84,6 @@ export function useCart() {
   // No procesa pago: el negocio sigue coordinando envío/transferencia por chat,
   // solo que ahora recibe el pedido ya prolijo y sin tener que preguntar nada.
   function checkout() {
-    console.log('checkout ejecutado', state.items)
     if (state.items.length === 0) return
 
     const message = buildOrderMessage(state.items, subtotal.value)

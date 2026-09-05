@@ -15,8 +15,8 @@ function subscribe() {
   <footer class="footer">
     <div class="wrap footer__inner">
       <div class="footer__brand">
-        <span class="footer__logo">FORME</span>
-        <p class="footer__tag">Prendas esenciales, hechas para durar.</p>
+        <span class="footer__logo">AVANTI</span>
+        <p class="footer__tag">Streetwear urbano. Nuevo drop cada semana.</p>
 
         <form class="footer__form" @submit.prevent="subscribe">
           <label for="newsletter" class="visually-hidden">Correo electrónico</label>
@@ -29,27 +29,27 @@ function subscribe() {
           />
           <button type="submit" class="btn">Suscribirme</button>
         </form>
-        <p v-if="submitted" class="footer__confirm">Listo — te avisaremos de la próxima colección.</p>
+        <p v-if="submitted" class="footer__confirm">Listo — te avisamos del próximo drop.</p>
       </div>
 
       <div class="footer__col">
         <p class="eyebrow">Tienda</p>
         <a href="#coleccion">Colección</a>
         <a href="#">Básicos</a>
-        <a href="#">Guía de tallas</a>
+        <a href="#">Guía de talles</a>
       </div>
 
       <div class="footer__col">
-        <p class="eyebrow">Marca</p>
-        <a href="#sobre">Nuestro proceso</a>
-        <a href="#">Sostenibilidad</a>
+        <p class="eyebrow">Avanti</p>
+        <a href="#sobre">Sobre nosotros</a>
+        <a href="#ubicacion">Ubicación</a>
         <a href="#">Contacto</a>
       </div>
     </div>
 
     <div class="wrap footer__bottom">
-      <span>© 2026 FORME. Todos los derechos reservados.</span>
-      <span>Diseñado con materiales que envejecen bien.</span>
+      <span>© 2026 Avanti. Todos los derechos reservados.</span>
+      <span>@avanti.gram</span>
     </div>
   </footer>
 </template>
@@ -68,9 +68,12 @@ function subscribe() {
 }
 
 .footer__logo {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  letter-spacing: 0.06em;
+  font-family: var(--font-logo);
+  font-weight: 800;
+  font-size: 1.55rem;
+  letter-spacing: -0.01em;
+  transform: skewX(-8deg);
+  display: inline-block;
 }
 
 .footer__tag {

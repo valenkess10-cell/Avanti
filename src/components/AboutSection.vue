@@ -1,16 +1,16 @@
 <script setup>
 const pillars = [
   {
-    title: 'Materiales primero',
-    text: 'Lino, lana y algodón de origen trazable. Si la tela no envejece bien, no entra en colección.',
-  },
-  {
-    title: 'Producción limitada',
-    text: 'Tiradas pequeñas, sin reposición constante. Cada pieza se agota y no vuelve hasta la temporada siguiente.',
+    title: 'Drops semanales',
+    text: 'Subimos productos nuevos todas las semanas. Lo que ves hoy en stock puede no estar la semana que viene.',
   },
   {
     title: 'Calces reales',
-    text: 'Probados sobre cuerpos reales, no sobre maniquí. El patrón se ajusta hasta que se mueve bien.',
+    text: 'Oversize, boxy, wide-leg — probamos todo sobre gente real de la calle, no en maniquí.',
+  },
+  {
+    title: 'Todo por WhatsApp',
+    text: 'Elegís, coordinás pago y envío directo por chat. Sin vueltas, sin registrarte en nada.',
   },
 ]
 </script>
@@ -19,8 +19,8 @@ const pillars = [
   <section id="sobre" class="about">
     <div class="wrap about__inner">
       <div class="about__lead">
-        <p class="eyebrow">Nuestro proceso</p>
-        <h2 class="about__title">Menos piezas, <em>mejor hechas.</em></h2>
+        <p class="eyebrow">Sobre Avanti</p>
+        <h2 class="about__title">Moda para vos, <em>a tu manera.</em></h2>
       </div>
 
       <div class="about__pillars">
@@ -53,8 +53,8 @@ const pillars = [
 }
 
 .about__title em {
-  font-style: italic;
-  color: #C7C2B4;
+  font-style: normal;
+  color: var(--moss);
 }
 
 .about__pillars {
@@ -64,7 +64,7 @@ const pillars = [
 }
 
 .pillar {
-  border-top: 1px solid rgba(239, 238, 234, 0.25);
+  border-top: 1px solid rgba(246, 245, 242, 0.25);
   padding-top: var(--space-2);
 }
 
@@ -77,7 +77,7 @@ const pillars = [
 }
 
 .pillar p {
-  color: #C9C6BE;
+  color: #B9B6AD;
   font-size: 0.88rem;
 }
 

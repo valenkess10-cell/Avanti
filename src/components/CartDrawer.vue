@@ -36,21 +36,21 @@ function handleCheckout() {
       </div>
 
       <ul v-else class="drawer__list">
-        <li v-for="item in state.items" :key="item.id" class="line">
+        <li v-for="item in state.items" :key="item.key" class="line">
           <div class="line__image" :style="{ background: item.tone }"></div>
 
           <div class="line__body">
             <div class="line__row">
               <span class="line__name">{{ item.name }}</span>
-              <button class="line__remove" @click="remove(item.id)" aria-label="Quitar producto">✕</button>
+              <button class="line__remove" @click="remove(item.key)" aria-label="Quitar producto">✕</button>
             </div>
-            <span class="line__fabric">{{ item.fabric }}</span>
+            <span class="line__fabric">Talle {{ item.size }} · {{ item.fabric }}</span>
 
             <div class="line__row line__row--bottom">
               <div class="stepper">
-                <button @click="decrement(item.id)" aria-label="Restar unidad">−</button>
+                <button @click="decrement(item.key)" aria-label="Restar unidad">−</button>
                 <span>{{ item.qty }}</span>
-                <button @click="increment(item.id)" aria-label="Sumar unidad">+</button>
+                <button @click="increment(item.key)" aria-label="Sumar unidad">+</button>
               </div>
               <span class="line__price">${{ (item.price * item.qty).toLocaleString('es-AR') }}</span>
             </div>
@@ -300,4 +300,4 @@ function handleCheckout() {
 .drawer-leave-to {
   transform: translateX(100%);
 }
-</style>  
+</style>
