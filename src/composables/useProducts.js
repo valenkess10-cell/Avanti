@@ -79,12 +79,16 @@ function mapProduct(record, stockRecords) {
   }
 }
 
-export function useProducts() {
-  const products = ref([])
-  const isLoading = ref(true)
-  const error = ref(null)
-  const usingFallback = ref(false)
+// Estado compartido a nivel de módulo (mismo patrón que useCart y
+// useContactPanel): sin importar cuántos componentes usen useProducts(), la
+// consulta a Airtable se dispara una sola vez y todos leen el mismo dato.
+const products = ref([])
+const isLoading = ref(true)
+const error = ref(null)
+const usingFallback = ref(false)
+let hasStartedLoad = false
 
+export function useProducts() {
   async function load() {
     isLoading.value = true
     error.value = null
@@ -121,7 +125,12 @@ export function useProducts() {
     }
   }
 
-  load()
+  // Solo la primera vez que se usa useProducts() en toda la app se dispara
+  // la carga real; las siguientes veces reutilizan el mismo estado.
+  if (!hasStartedLoad) {
+    hasStartedLoad = true
+    load()
+  }
 
   return { products, isLoading, error, usingFallback, reload: load }
 }

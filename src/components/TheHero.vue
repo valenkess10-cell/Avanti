@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useProducts } from '../composables/useProducts'
 
 defineProps({
@@ -16,12 +16,17 @@ let timer = null
 
 function startCycle() {
   clearInterval(timer)
+  current.value = 0
   if (slides.value.length < 2) return
   timer = setInterval(() => {
     current.value = (current.value + 1) % slides.value.length
   }, 4500)
 }
 
+// Los datos de Airtable llegan de forma asíncrona (después del primer
+// render), así que además de arrancar al montar, reiniciamos el ciclo cada
+// vez que cambia la cantidad de fotos disponibles.
+watch(() => slides.value.length, startCycle)
 onMounted(startCycle)
 onUnmounted(() => clearInterval(timer))
 
