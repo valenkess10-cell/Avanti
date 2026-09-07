@@ -1,7 +1,31 @@
 <script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useProducts } from '../composables/useProducts'
+
 defineProps({
   onExplore: { type: Function, default: () => {} },
 })
+
+const { products } = useProducts()
+
+// Solo productos con foto real cargada; máximo 6 para no pedir de más.
+const slides = computed(() => products.value.filter((p) => p.image).slice(0, 6))
+
+const current = ref(0)
+let timer = null
+
+function startCycle() {
+  clearInterval(timer)
+  if (slides.value.length < 2) return
+  timer = setInterval(() => {
+    current.value = (current.value + 1) % slides.value.length
+  }, 4500)
+}
+
+onMounted(startCycle)
+onUnmounted(() => clearInterval(timer))
+
+const activeProduct = computed(() => slides.value[current.value])
 </script>
 
 <template>
@@ -25,12 +49,32 @@ defineProps({
 
       <div class="hero__visual">
         <div class="hero__block">
-          <span class="hero__block-caption">Drop 01 — Urban Pack</span>
+          <img
+            v-for="(slide, i) in slides"
+            :key="slide.id"
+            :src="slide.image"
+            :alt="slide.name"
+            class="hero__photo"
+            :class="{ 'is-active': i === current }"
+            :loading="i === 0 ? 'eager' : 'lazy'"
+          />
+
+          <span class="hero__block-caption">
+            {{ activeProduct ? activeProduct.name : 'Drop 01 — Urban Pack' }}
+          </span>
         </div>
+
         <div class="hero__tag" aria-hidden="true">
-          <span class="hero__tag-line">TELA&nbsp;&nbsp;ALGODÓN 100%</span>
-          <span class="hero__tag-line">CALCE&nbsp;&nbsp;OVERSIZE</span>
-          <span class="hero__tag-line">ORIGEN&nbsp;&nbsp;ARGENTINA</span>
+          <template v-if="activeProduct">
+            <span class="hero__tag-line">TELA&nbsp;&nbsp;{{ activeProduct.fabric || '—' }}</span>
+            <span class="hero__tag-line">CALCE&nbsp;&nbsp;{{ activeProduct.fit || '—' }}</span>
+            <span class="hero__tag-line">ORIGEN&nbsp;&nbsp;ARGENTINA</span>
+          </template>
+          <template v-else>
+            <span class="hero__tag-line">TELA&nbsp;&nbsp;ALGODÓN 100%</span>
+            <span class="hero__tag-line">CALCE&nbsp;&nbsp;OVERSIZE</span>
+            <span class="hero__tag-line">ORIGEN&nbsp;&nbsp;ARGENTINA</span>
+          </template>
         </div>
       </div>
     </div>
@@ -85,16 +129,33 @@ defineProps({
   margin-left: var(--space-5);
   display: flex;
   align-items: flex-end;
+  overflow: hidden;
   animation: rise 1s ease both;
 }
 
+.hero__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.1s ease;
+}
+
+.hero__photo.is-active {
+  opacity: 1;
+}
+
 .hero__block-caption {
+  position: relative;
   font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   color: var(--white);
   padding: var(--space-3);
   text-transform: uppercase;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
 }
 
 /* Firma visual: etiqueta de composición como la de una prenda real,

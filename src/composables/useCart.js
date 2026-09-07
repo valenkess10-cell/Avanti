@@ -12,10 +12,11 @@ const state = reactive({
 // Formato: código de país + área sin el 0 + número sin el 15. Ej: Argentina, La Rioja capital: 549380XXXXXXX
 const WHATSAPP_NUMBER = '5493800000000'
 
-// Cada línea del carrito se identifica por producto + talle: así "Hoodie talle M"
-// y "Hoodie talle L" son renglones separados en vez de mezclarse en uno solo.
-function lineKey(id, size) {
-  return `${id}::${size}`
+// Cada línea del carrito se identifica por producto + talle + color: así
+// "Hoodie negro, talle M" y "Hoodie blanco, talle M" son renglones separados
+// en vez de mezclarse en uno solo.
+function lineKey(id, size, color) {
+  return `${id}::${size}::${color || 'sin-color'}`
 }
 
 function formatPrice(value) {
@@ -23,10 +24,10 @@ function formatPrice(value) {
 }
 
 function buildOrderMessage(items, subtotal) {
-  const lines = items.map(
-    (item) =>
-      `• ${item.qty}x ${item.name} (Talle ${item.size}) — $${formatPrice(item.price * item.qty)}`
-  )
+  const lines = items.map((item) => {
+    const detalle = item.color ? `Talle ${item.size} · ${item.color}` : `Talle ${item.size}`
+    return `• ${item.qty}x ${item.name} (${detalle}) — $${formatPrice(item.price * item.qty)}`
+  })
 
   return [
     'Hola! Quiero hacer este pedido:',
@@ -46,13 +47,13 @@ export function useCart() {
     state.items.reduce((total, item) => total + item.qty * item.price, 0)
   )
 
-  function add(product, size) {
-    const key = lineKey(product.id, size)
+  function add(product, size, color) {
+    const key = lineKey(product.id, size, color)
     const existing = state.items.find((item) => item.key === key)
     if (existing) {
       existing.qty++
     } else {
-      state.items.push({ ...product, size, key, qty: 1 })
+      state.items.push({ ...product, size, color, key, qty: 1 })
     }
     state.isOpen = true
   }

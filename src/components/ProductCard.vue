@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useCart } from '../composables/useCart'
 
 const props = defineProps({
@@ -8,40 +8,96 @@ const props = defineProps({
 
 const { add } = useCart()
 
+// stockBySize solo existe para productos que vienen de Airtable. El catálogo
+// de respaldo (sin Airtable configurado) no lo tiene, así que todo se maneja
+// como "siempre disponible" en ese caso.
+const hasStockInfo = computed(() => Array.isArray(props.product.stockBySize))
+
 const selectedSize = ref(props.product.sizeOptions[0])
 
+const sizeInfo = computed(() =>
+  hasStockInfo.value
+    ? props.product.stockBySize.find((s) => s.talle === selectedSize.value)
+    : null
+)
+
+const colorOptions = computed(() => sizeInfo.value?.colores || [])
+const selectedColor = ref(colorOptions.value[0]?.color || null)
+
+watch(selectedSize, () => {
+  selectedColor.value = colorOptions.value[0]?.color || null
+})
+
+function stockForSize(talle) {
+  if (!hasStockInfo.value) return null
+  return props.product.stockBySize.find((s) => s.talle === talle)?.total ?? 0
+}
+
+const isSoldOut = computed(() => {
+  if (!hasStockInfo.value) return false
+  if (colorOptions.value.length === 0) return (sizeInfo.value?.total ?? 0) <= 0
+  const colorStock = colorOptions.value.find((c) => c.color === selectedColor.value)
+  return (colorStock?.cantidad ?? 0) <= 0
+})
+
 function handleAdd() {
-  add(props.product, selectedSize.value)
+  if (isSoldOut.value) return
+  add(props.product, selectedSize.value, selectedColor.value)
 }
 </script>
 
 <template>
   <article class="card" :class="`card--${product.size}`">
-    <div
-      class="card__image"
-      :style="product.image
-        ? {
-            backgroundImage: `url(${product.image}), ${product.tone}`,
-            backgroundSize: 'cover, cover',
-            backgroundPosition: 'center, center',
-          }
-        : { background: product.tone }"
-    >
-      <div class="card__sizes" role="group" aria-label="Elegir talle">
-        <button
-          v-for="opt in product.sizeOptions"
-          :key="opt"
-          type="button"
-          class="card__size"
-          :class="{ 'is-active': selectedSize === opt }"
-          @click="selectedSize = opt"
-        >
-          {{ opt }}
-        </button>
+    <div class="card__image" :style="{ background: product.tone }">
+      <img
+        v-if="product.image"
+        :src="product.image"
+        :alt="product.name"
+        class="card__photo"
+        loading="lazy"
+      />
+
+      <div class="card__picker">
+        <div class="card__sizes" role="group" aria-label="Elegir talle">
+          <button
+            v-for="opt in product.sizeOptions"
+            :key="opt"
+            type="button"
+            class="card__size"
+            :class="{ 'is-active': selectedSize === opt, 'is-disabled': stockForSize(opt) === 0 }"
+            :disabled="stockForSize(opt) === 0"
+            @click="selectedSize = opt"
+          >
+            {{ opt }}
+          </button>
+        </div>
+
+        <div v-if="colorOptions.length > 1" class="card__colors" role="group" aria-label="Elegir color">
+          <button
+            v-for="c in colorOptions"
+            :key="c.color"
+            type="button"
+            class="card__color-chip"
+            :class="{ 'is-active': selectedColor === c.color, 'is-disabled': c.cantidad === 0 }"
+            :disabled="c.cantidad === 0"
+            @click="selectedColor = c.color"
+          >
+            {{ c.color }}
+          </button>
+        </div>
       </div>
 
-      <button class="card__add" @click="handleAdd" :aria-label="`Añadir ${product.name}, talle ${selectedSize}, al carrito`">
-        Añadir · Talle {{ selectedSize }}
+      <button
+        class="card__add"
+        :class="{ 'is-disabled': isSoldOut }"
+        :disabled="isSoldOut"
+        @click="handleAdd"
+        :aria-label="`Añadir ${product.name}, talle ${selectedSize}, al carrito`"
+      >
+        <template v-if="isSoldOut">Sin stock en este talle/color</template>
+        <template v-else>
+          Añadir · Talle {{ selectedSize }}<span v-if="selectedColor"> · {{ selectedColor }}</span>
+        </template>
       </button>
 
       <div class="card__tag">
@@ -72,28 +128,44 @@ function handleAdd() {
   overflow: hidden;
 }
 
+.card__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .card--short .card__image {
   aspect-ratio: 3 / 3.4;
 }
 
-.card__sizes {
+.card__picker {
   position: absolute;
   left: var(--space-2);
   right: var(--space-2);
   bottom: calc(var(--space-2) + 2.6rem);
   display: flex;
+  flex-direction: column;
   gap: 6px;
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-.card:hover .card__sizes {
+.card:hover .card__picker {
   opacity: 1;
   transform: translateY(0);
 }
 
-.card__size {
+.card__sizes,
+.card__colors {
+  display: flex;
+  gap: 6px;
+}
+
+.card__size,
+.card__color-chip {
   flex: 1;
   background: var(--paper);
   border: 1px solid var(--line);
@@ -103,10 +175,22 @@ function handleAdd() {
   padding: 0.35rem 0;
 }
 
-.card__size.is-active {
+.card__color-chip {
+  text-transform: capitalize;
+}
+
+.card__size.is-active,
+.card__color-chip.is-active {
   border-color: var(--ink);
   background: var(--ink);
   color: var(--bone);
+}
+
+.card__size.is-disabled,
+.card__color-chip.is-disabled {
+  color: var(--line);
+  text-decoration: line-through;
+  cursor: not-allowed;
 }
 
 .card__add {
@@ -133,6 +217,16 @@ function handleAdd() {
 .card__add:hover {
   background: var(--ink);
   color: var(--bone);
+}
+
+.card__add.is-disabled {
+  color: var(--ink-soft);
+  cursor: not-allowed;
+}
+
+.card__add.is-disabled:hover {
+  background: var(--paper);
+  color: var(--ink-soft);
 }
 
 /* Elemento firma: etiqueta de composición, como una etiqueta de tela real,
@@ -200,7 +294,7 @@ function handleAdd() {
 @media (max-width: 780px) {
   .card__tag,
   .card__add,
-  .card__sizes {
+  .card__picker {
     opacity: 1;
     transform: none;
   }

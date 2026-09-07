@@ -1,30 +1,41 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { products } from '../data/products'
-import { useProductSearch } from '../composables/useProductSearch.js'
+import { useProducts } from '../composables/useProducts'
+import { useProductSearch } from '../composables/useProductSearch'
 import ProductCard from './ProductCard.vue'
 
+const { products, isLoading, usingFallback } = useProducts()
 const { state: search, setQuery } = useProductSearch()
 
-const categories = ['Todo', ...new Set(products.map((p) => p.category))]
+const categories = computed(() => ['Todo', ...new Set(products.value.map((p) => p.category))])
 const active = ref('Todo')
 
 const visible = computed(() => {
   const byCategory =
-    active.value === 'Todo' ? products : products.filter((p) => p.category === active.value)
+    active.value === 'Todo'
+      ? products.value
+      : products.value.filter((p) => p.category === active.value)
 
   const query = search.query.trim().toLowerCase()
-  if (!query) return byCategory
+  const filtered = !query
+    ? byCategory
+    : byCategory.filter(
+        (p) => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query)
+      )
 
-  return byCategory.filter(
-    (p) => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query)
-  )
+  // Alterna el alto de las tarjetas para el efecto escalonado de la grilla,
+  // sin depender de un campo manual por producto.
+  return filtered.map((p, i) => ({ ...p, size: i % 2 === 0 ? 'tall' : 'short' }))
 })
 </script>
 
 <template>
   <section id="coleccion" class="grid-section">
     <div class="wrap">
+      <p v-if="usingFallback" class="grid-section__notice">
+        Mostrando catálogo de referencia — conectá Airtable para ver el stock real.
+      </p>
+
       <div class="grid-section__head">
         <div>
           <p class="eyebrow">Colección</p>
@@ -59,7 +70,9 @@ const visible = computed(() => {
         </div>
       </div>
 
-      <p v-if="visible.length === 0" class="grid-section__empty">
+      <p v-if="isLoading" class="grid-section__empty">Cargando productos...</p>
+
+      <p v-else-if="visible.length === 0" class="grid-section__empty">
         No encontramos productos que coincidan con "{{ search.query }}".
       </p>
 
@@ -73,6 +86,15 @@ const visible = computed(() => {
 <style scoped>
 .grid-section {
   padding-bottom: var(--space-6);
+}
+
+.grid-section__notice {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  padding: 0.6rem var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 .grid-section__head {

@@ -37,14 +37,18 @@ function handleCheckout() {
 
       <ul v-else class="drawer__list">
         <li v-for="item in state.items" :key="item.key" class="line">
-          <div class="line__image" :style="{ background: item.tone }"></div>
+          <div class="line__image" :style="{ background: item.tone }">
+            <img v-if="item.image" :src="item.image" :alt="item.name" class="line__photo" />
+          </div>
 
           <div class="line__body">
             <div class="line__row">
               <span class="line__name">{{ item.name }}</span>
               <button class="line__remove" @click="remove(item.key)" aria-label="Quitar producto">✕</button>
             </div>
-            <span class="line__fabric">Talle {{ item.size }} · {{ item.fabric }}</span>
+            <span class="line__fabric">
+              Talle {{ item.size }}<template v-if="item.color"> · {{ item.color }}</template>
+            </span>
 
             <div class="line__row line__row--bottom">
               <div class="stepper">
@@ -124,8 +128,9 @@ function handleCheckout() {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
+  text-align: center;
   gap: var(--space-3);
   padding: var(--space-4);
 }
@@ -146,9 +151,19 @@ function handleCheckout() {
 }
 
 .line__image {
+  position: relative;
   width: 74px;
   height: 96px;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.line__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .line__body {
