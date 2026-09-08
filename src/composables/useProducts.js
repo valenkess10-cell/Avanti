@@ -61,14 +61,16 @@ function buildSizeOptions(productId, stockRecords) {
 function mapProduct(record, stockRecords) {
   const f = record.fields
   const sizeRows = buildSizeOptions(record.id, stockRecords)
-  const photo = f.Fotos && f.Fotos[0] ? f.Fotos[0].url : null
+  const photos = (f.Fotos || []).map((p) => p.url)
 
   return {
     id: record.id,
     name: f.Nombre || 'Producto sin nombre',
     category: f.Categoría || 'Sin categoría',
     price: f.Precio || 0,
-    image: photo,
+    description: f.Descripción || '',
+    image: photos[0] || null,
+    images: photos,
     tone: FALLBACK_TONE,
     size: 'tall',
     fabric: f.Tela || '',

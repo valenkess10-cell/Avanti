@@ -6,6 +6,7 @@ import AboutSection from './components/AboutSection.vue'
 import LocationSection from './components/LocationSection.vue'
 import TheFooter from './components/TheFooter.vue'
 import CartDrawer from './components/CartDrawer.vue'
+import ProductQuickView from './components/ProductQuickView.vue'
 </script>
 
 <template>
@@ -20,4 +21,5 @@ import CartDrawer from './components/CartDrawer.vue'
 
   <TheFooter />
   <CartDrawer />
+  <ProductQuickView />
 </template>

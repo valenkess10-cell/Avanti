@@ -1,12 +1,15 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useCart } from '../composables/useCart'
+import { useQuickView } from '../composables/useQuickView'
+import { getColorHex } from '../utils/colorSwatch'
 
 const props = defineProps({
   product: { type: Object, required: true },
 })
 
 const { add } = useCart()
+const { open: openQuickView } = useQuickView()
 
 // stockBySize solo existe para productos que vienen de Airtable. El catálogo
 // de respaldo (sin Airtable configurado) no lo tiene, así que todo se maneja
@@ -47,7 +50,7 @@ function handleAdd() {
 </script>
 
 <template>
-  <article class="card" :class="`card--${product.size}`">
+  <article class="card" :class="`card--${product.size}`" @click="openQuickView(product)">
     <div class="card__image" :style="{ background: product.tone }">
       <img
         v-if="product.image"
@@ -57,7 +60,7 @@ function handleAdd() {
         loading="lazy"
       />
 
-      <div class="card__picker">
+      <div class="card__picker" @click.stop>
         <div class="card__sizes" role="group" aria-label="Elegir talle">
           <button
             v-for="opt in product.sizeOptions"
@@ -82,6 +85,7 @@ function handleAdd() {
             :disabled="c.cantidad === 0"
             @click="selectedColor = c.color"
           >
+            <span class="card__color-swatch" :style="{ background: getColorHex(c.color) }"></span>
             {{ c.color }}
           </button>
         </div>
@@ -91,7 +95,7 @@ function handleAdd() {
         class="card__add"
         :class="{ 'is-disabled': isSoldOut }"
         :disabled="isSoldOut"
-        @click="handleAdd"
+        @click.stop="handleAdd"
         :aria-label="`Añadir ${product.name}, talle ${selectedSize}, al carrito`"
       >
         <template v-if="isSoldOut">Sin stock en este talle/color</template>
@@ -120,6 +124,7 @@ function handleAdd() {
 .card {
   display: flex;
   flex-direction: column;
+  cursor: pointer;
 }
 
 .card__image {
@@ -177,6 +182,17 @@ function handleAdd() {
 
 .card__color-chip {
   text-transform: capitalize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.card__color-swatch {
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
 }
 
 .card__size.is-active,
